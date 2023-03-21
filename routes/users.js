@@ -5,7 +5,14 @@ const fs = require('fs').promises;
 const dataPath = path.join(__dirname, '../data/users.json');
 
 router.get('/users', (req, res) => {
-  fs.readFile(dataPath, { encoding: 'utf-8' }).then((data) => res.send(data));
+  fs.readFile(dataPath, { encoding: 'utf-8' })
+    .then((data) => {
+      const user = JSON.parse(data);
+      res.json(user);
+    })
+    .catch(() =>
+      res.status(500).send({ message: 'We have encountered an error' })
+    );
 });
 
 router.get('/users/:id', (req, res) => {
@@ -21,7 +28,6 @@ router.get('/users/:id', (req, res) => {
       }
     })
     .catch(() => {
-      // console.log('err =>', err);
       res.status(500).send({ message: 'We have encountered an error' });
     });
 });

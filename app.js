@@ -13,6 +13,4 @@ app.use((req, res) => {
   res.status(404).send({ message: 'Request resource not found' });
 });
 
-app.listen(PORT, () => {
-  // console.log(`App listening on port ${PORT}`);
-});
+app.listen(PORT, () => {});
