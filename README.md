@@ -14,6 +14,8 @@
 3. Start the server using `npm run dev`
 4. To launch the server with the hot reload feature `npm run dev`
 
+![img](images/bashTerminal.png)
+
 ## Directories
 
 `/data` — JSON files to temporarily emulate database integration.
@@ -23,3 +25,5 @@
 All other directories are optional and may be created by the developer if necessary.
 
 ## **The initial project structure should look something like this:**
+
+![img](images/structureProj12.png)
