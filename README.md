@@ -20,6 +20,6 @@
 
 `/routes` — routing files.
 
-All other directories are optional and may be created by the developer if necessary.
-**The initial project structure should look something like this:**
+## All other directories are optional and may be created by the developer if necessary.
+## **The initial project structure should look something like this:**
 ![structureProj12](https://user-images.githubusercontent.com/15382289/226703852-50abdf2f-ee3a-4c36-8445-aa39fc17a6d3.png)
