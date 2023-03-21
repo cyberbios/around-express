@@ -13,6 +13,8 @@
 2. Install the dependencies by running `npm install`
 3. Start the server using `npm run dev`
 4. To launch the server with the hot reload feature `npm run dev`
+![bashTerminal](https://user-images.githubusercontent.com/15382289/226705111-b30c76c2-665f-4ba1-b8c1-02ea90d9d22b.png)
+
 
 ## Directories
 
