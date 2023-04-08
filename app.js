@@ -31,14 +31,14 @@ app.use((err, req, res, next) => {
 
 // connect to MongoDB
 mongoose
-  .connect('mongodb://localhost:27017/aroundb', {
+  .connect('mongodb://127.0.0.1:27017/aroundb', {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
   .then(() => {
-    console.log('Connected to MongoDB');
+    // console.log('Connected to MongoDB');
     app.listen(PORT, () => {
-      console.log(`App listening on port ${PORT}`);
+      // console.log(`App listening on port ${PORT}`);
     });
   })
   .catch((err) => console.error(err));
