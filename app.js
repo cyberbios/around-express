@@ -6,6 +6,8 @@ const { PORT = 3000 } = process.env;
 const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
 
+const { NOT_FOUND, DEFAULT } = require('./constants/utils');
+
 const app = express();
 
 // body-parser middleware
@@ -27,8 +29,8 @@ app.use('/', cardsRouter);
 
 // error handling middleware
 app.use((err, req, res) => {
-  res.status(404).send({ message: 'Resource not found' });
-  res.status(500).send({ message: 'We have encountered an error' });
+  res.status(NOT_FOUND).send({ message: 'Resource not found' });
+  res.status(DEFAULT).send({ message: 'We have encountered an error' });
 });
 
 // connect to MongoDB
