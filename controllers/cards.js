@@ -1,93 +1,95 @@
 const Card = require('../models/card');
 
-module.exports.getAllCards = (req, res) => {
-  Card.find({})
-    .orFail(() => {
-      const error = new Error('Cards not found');
-      error.status = 404;
-      throw error;
-    })
-    .then((cards) => res.status(200).send({ data: cards }))
-    .catch((err) => {
-      if (err.name === 'castError') {
-        res.status(400).send({ message: 'Invalid card ID' });
-      } else {
-        res.status(500).send({ message: 'We have encountered an error' });
-      }
-    });
+const {
+  BAD_REQUEST,
+  NOT_FOUND,
+  DEFAULT,
+  OK,
+  CREATED,
+} = require('../constants/utils');
+
+module.exports.getAllCards = async (req, res) => {
+  try {
+    const cards = await Card.find({});
+    res.status(OK).send({ data: cards });
+  } catch (err) {
+    res.status(DEFAULT).send({ message: 'We have encountered an error' });
+  }
 };
 
-module.exports.createCard = (req, res) => {
+module.exports.createCard = async (req, res) => {
   const { name, link } = req.body;
 
-  Card.create({ name, link, owner: req.user._id })
-    .then((card) => {
-      res.status(201).send({ data: card });
-    })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        const message = `${Object.values(err.errors)
+  try {
+    const card = await Card.create({ name, link, owner: req.user._id });
+    res.status(CREATED).send({ data: card });
+  } catch (err) {
+    if (err.name === 'ValidationError') {
+      res.status(BAD_REQUEST).send({
+        message: `${Object.values(err.errors)
           .map((error) => error.message)
-          .join(', ')}`;
-        res
-          .status(400)
-          .send({ message: 'Invalid data passed for creating a card' });
-      } else {
-        res.status(500).send({ message: err.message });
-      }
-    });
+          .join(', ')}`,
+      });
+      res
+        .status(BAD_REQUEST)
+        .send({ message: 'Invalid data passed for creating a card' });
+    } else {
+      res.status(DEFAULT).send({ message: 'We have encountered an error' });
+    }
+  }
 };
 
-module.exports.deleteCard = (req, res) => {
-  Card.findByIdAndRemove(Card)
-    .orFail(() => {
-      const error = new Error('Card not found');
-      error.status = 404;
-      throw error;
-    })
-
-    .then((card) => res.status(200).send({ data: card }))
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Invalid card ID' });
-      } else {
-        res.status(500).send({ message: 'We have encountered an error' });
-      }
-    });
+module.exports.deleteCard = async (req, res) => {
+  try {
+    const card = await Card.findByIdAndRemove(req.params.cardId).orFail(
+      new Error('Card not found')
+    );
+    res.status(OK).send({ data: card });
+  } catch (err) {
+    if (err.message === 'Card not found') {
+      res.status(NOT_FOUND).send({ message: 'Card not found' });
+    } else if (err.name === 'CastError') {
+      res.status(BAD_REQUEST).send({ message: 'Invalid card ID' });
+    } else {
+      res.status(DEFAULT).send({ message: 'We have encountered an error' });
+    }
+  }
 };
 
-module.exports.likeCard = (req, res) => {
-  Card.findByIdAndUpdate(
-    req.params.cardId,
-    { $addToSet: { likes: req.user._id } },
-    { new: true }
-  )
-    .orFail(new Error('NotFound'))
-    .then((card) => res.send({ data: card }))
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        return res.status(400).send({ message: 'Invalid ID format' });
-      } else if (err.message === 'NotFound') {
-        return res.status(404).send({ message: 'Card not found' });
-      }
-      res.status(500).send({ message: 'We have encountered an error' });
-    });
+module.exports.likeCard = async (req, res) => {
+  try {
+    const card = await Card.findByIdAndUpdate(
+      req.params.cardId,
+      { $addToSet: { likes: req.user._id } },
+      { new: true }
+    ).orFail(new Error('Card not Found'));
+    res.send({ data: card });
+  } catch (err) {
+    if (err.name === 'CastError') {
+      res.status(BAD_REQUEST).send({ message: 'Invalid ID format' });
+    } else if (err.message === 'Card not Found') {
+      res.status(NOT_FOUND).send({ message: 'Card not found' });
+    } else {
+      res.status(DEFAULT).send({ message: 'We have encountered an error' });
+    }
+  }
 };
 
-module.exports.dislikeCard = (req, res) => {
-  Card.findByIdAndUpdate(
-    req.params.cardId,
-    { $pull: { likes: req.user._id } },
-    { new: true }
-  )
-    .orFail(new Error('NotFound'))
-    .then((card) => res.send({ data: card }))
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        return res.status(400).send({ message: 'Invalid ID format' });
-      } else if (err.message === 'NotFound') {
-        return res.status(404).send({ message: 'Card not found' });
-      }
-      res.status(500).send({ message: 'We have encountered an error' });
-    });
+module.exports.dislikeCard = async (req, res) => {
+  try {
+    const card = Card.findByIdAndUpdate(
+      req.params.cardId,
+      { $pull: { likes: req.user._id } },
+      { new: true }
+    ).orFail(new Error('Card not Found'));
+    res.send({ data: card });
+  } catch (err) {
+    if (err.name === 'CastError') {
+      res.status(BAD_REQUEST).send({ message: 'Invalid ID format' });
+    } else if (err.message === 'Card not Found') {
+      res.status(NOT_FOUND).send({ message: 'Card not found' });
+    } else {
+      res.status(DEFAULT).send({ message: 'We have encountered an error' });
+    }
+  }
 };

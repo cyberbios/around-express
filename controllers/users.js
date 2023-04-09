@@ -1,10 +1,18 @@
 const User = require('../models/user');
 
+const {
+  BAD_REQUEST,
+  NOT_FOUND,
+  DEFAULT,
+  OK,
+  CREATED,
+} = require('../constants/utils');
+
 const getUsers = (req, res) => {
   User.find({})
-    .then((users) => res.status(200).send({ data: users }))
+    .then((users) => res.status(OK).send({ data: users }))
     .catch(() => {
-      res.status(500).send({ message: 'We have encountered an error' });
+      res.status(DEFAULT).send({ message: 'We have encountered an error' });
     });
 };
 
@@ -14,18 +22,22 @@ const getUserById = (req, res) => {
   User.findById(userId)
     .orFail(() => {
       const error = new Error('User not found');
-      error.status = 404;
+      error.status = NOT_FOUND;
       throw error;
     })
     .then((user) => {
-      res.status(200).send({ data: user });
+      res.status(OK).send({ data: user });
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(400).send(err.message);
-      } else {
-        res.status(500).send(err.message);
+      if (err.status === NOT_FOUND) {
+        res.status(NOT_FOUND).send({ message: 'User not found' });
+        return;
       }
+      if (err.name === 'CastError') {
+        res.status(BAD_REQUEST).send({ message: 'Invalid ID format' });
+        return;
+      }
+      res.status(DEFAULT).send({ message: 'We have encountered an error' });
     });
 };
 
@@ -33,17 +45,17 @@ const createUser = (req, res) => {
   const { name, avatar, about } = req.body;
 
   User.create({ name, avatar, about })
-    .then((user) => res.status(201).send({ data: user }))
+    .then((user) => res.status(CREATED).send({ data: user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        const message = `${Object.values(
-          err.errors.map((error) => error.message)
-        )}`;
+        res.status(BAD_REQUEST).send({
+          message: `${Object.values(err.map((error) => error.message))}`,
+        });
         res
-          .status(400)
+          .status(BAD_REQUEST)
           .send({ message: 'Invalid data passed for creating a user' });
       } else {
-        res.status(500).send({ message: err.message });
+        res.status(DEFAULT).send({ message: 'We have encountered an error' });
       }
     });
 };
@@ -60,16 +72,19 @@ const updateUser = (req, res) => {
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(400).send({ message: 'Invalid ID format' });
-      } else if (err.name === 'ValidationError') {
-        const message = Object.values(err.errors).map((error) => error.message);
-        return res
-          .status(400)
-          .send({ message: `Invalid user data: ${message}` });
-      } else if (err.message === 'NotFound') {
-        return res.status(404).send({ message: 'User not found' });
+        res.status(BAD_REQUEST).send({ message: 'Invalid ID format' });
+        return;
       }
-      res.status(500).send({ message: 'We have encountered an error' });
+      if (err.name === 'ValidationError') {
+        const message = Object.values(err.errors).map((error) => error.message);
+        res
+          .status(BAD_REQUEST)
+          .send({ message: `Invalid user data: ${message}` });
+      }
+      if (err.message === 'NotFound') {
+        res.status(NOT_FOUND).send({ message: 'User not found' });
+      }
+      res.status(DEFAULT).send({ message: 'We have encountered an error' });
     });
 };
 
@@ -85,16 +100,20 @@ const updateUserAvatar = (req, res) => {
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(400).send({ message: 'Invalid ID format' });
-      } else if (err.name === 'ValidationError') {
-        const message = Object.values(err.errors).map((error) => error.message);
-        return res
-          .status(400)
-          .send({ message: `Invalid user data: ${message}` });
-      } else if (err.message === 'NotFound') {
-        return res.status(404).send({ message: 'User not found' });
+        res.status(BAD_REQUEST).send({ message: 'Invalid ID format' });
+        return;
       }
-      res.status(500).send({ message: 'We have encountered an error' });
+      if (err.name === 'ValidationError') {
+        const message = Object.values(err.errors).map((error) => error.message);
+        res
+          .status(BAD_REQUEST)
+          .send({ message: `Invalid user data: ${message}` });
+        return;
+      }
+      if (err.message === 'NotFound') {
+        res.status(NOT_FOUND).send({ message: 'User not found' });
+      }
+      res.status(DEFAULT).send({ message: 'We have encountered an error' });
     });
 };
 

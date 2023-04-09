@@ -18,9 +18,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     validate: {
-      validator: (v) => {
-        return LINK_REGEXP.test(v);
-      },
+      validator: (v) => LINK_REGEXP.test(v),
       message: 'The avatar must be filled....',
     },
   },

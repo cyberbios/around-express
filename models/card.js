@@ -12,9 +12,7 @@ const cardSchema = new mongoose.Schema({
     type: String,
     required: true,
     validate: {
-      validator: (v) => {
-        return LINK_REGEXP.test(v);
-      },
+      validator: (v) => LINK_REGEXP.test(v),
       message: 'The link must be filled...',
     },
   },
@@ -24,8 +22,7 @@ const cardSchema = new mongoose.Schema({
     ref: 'user',
   },
   likes: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'user',
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'user' }],
     default: [],
   },
   createdAt: {
