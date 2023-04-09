@@ -1,6 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
+
 const { PORT = 3000 } = process.env;
+
 const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
 
@@ -20,12 +22,12 @@ app.use((req, res, next) => {
 });
 
 // routes
-app.use('/users', usersRouter);
-app.use('/cards', cardsRouter);
+app.use('/', usersRouter);
+app.use('/', cardsRouter);
 
 // error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
+app.use((err, req, res) => {
+  res.status(404).send({ message: 'Resource not found' });
   res.status(500).send({ message: 'We have encountered an error' });
 });
 
@@ -38,7 +40,6 @@ mongoose
   .then(() => {
     // console.log('Connected to MongoDB');
     app.listen(PORT, () => {
-      // console.log(`App listening on port ${PORT}`);
+      //  console.log(`App listening on port ${PORT}`);
     });
-  })
-  .catch((err) => console.error(err));
+  });
