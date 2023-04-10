@@ -4,14 +4,13 @@ const {
   BAD_REQUEST,
   NOT_FOUND,
   DEFAULT,
-  OK,
   CREATED,
 } = require('../constants/utils');
 
 module.exports.getAllCards = async (req, res) => {
   try {
     const cards = await Card.find({});
-    res.status(OK).send({ data: cards });
+    res.send({ data: cards });
   } catch (err) {
     res.status(DEFAULT).send({ message: 'We have encountered an error' });
   }
@@ -25,11 +24,6 @@ module.exports.createCard = async (req, res) => {
     res.status(CREATED).send({ data: card });
   } catch (err) {
     if (err.name === 'ValidationError') {
-      res.status(BAD_REQUEST).send({
-        message: `${Object.values(err.errors)
-          .map((error) => error.message)
-          .join(', ')}`,
-      });
       res
         .status(BAD_REQUEST)
         .send({ message: 'Invalid data passed for creating a card' });
@@ -44,7 +38,7 @@ module.exports.deleteCard = async (req, res) => {
     const card = await Card.findByIdAndRemove(req.params.cardId).orFail(
       new Error('Card not found')
     );
-    res.status(OK).send({ data: card });
+    res.send({ data: card });
   } catch (err) {
     if (err.message === 'Card not found') {
       res.status(NOT_FOUND).send({ message: 'Card not found' });
@@ -77,7 +71,7 @@ module.exports.likeCard = async (req, res) => {
 
 module.exports.dislikeCard = async (req, res) => {
   try {
-    const card = Card.findByIdAndUpdate(
+    const card = await Card.findByIdAndUpdate(
       req.params.cardId,
       { $pull: { likes: req.user._id } },
       { new: true }

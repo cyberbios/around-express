@@ -4,29 +4,28 @@ const {
   BAD_REQUEST,
   NOT_FOUND,
   DEFAULT,
-  OK,
   CREATED,
 } = require('../constants/utils');
 
 const getUsers = (req, res) => {
   User.find({})
-    .then((users) => res.status(OK).send({ data: users }))
+    .then((users) => res.send({ data: users }))
     .catch(() => {
       res.status(DEFAULT).send({ message: 'We have encountered an error' });
     });
 };
 
 const getUserById = (req, res) => {
-  const { userId } = req.params;
+  const { id } = req.params;
 
-  User.findById(userId)
+  User.findById(id)
     .orFail(() => {
       const error = new Error('User not found');
       error.status = NOT_FOUND;
       throw error;
     })
     .then((user) => {
-      res.status(OK).send({ data: user });
+      res.send({ data: user });
     })
     .catch((err) => {
       if (err.status === NOT_FOUND) {
@@ -48,9 +47,6 @@ const createUser = (req, res) => {
     .then((user) => res.status(CREATED).send({ data: user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(BAD_REQUEST).send({
-          message: `${Object.values(err.map((error) => error.message))}`,
-        });
         res
           .status(BAD_REQUEST)
           .send({ message: 'Invalid data passed for creating a user' });
@@ -80,9 +76,11 @@ const updateUser = (req, res) => {
         res
           .status(BAD_REQUEST)
           .send({ message: `Invalid user data: ${message}` });
+        return;
       }
       if (err.message === 'NotFound') {
         res.status(NOT_FOUND).send({ message: 'User not found' });
+        return;
       }
       res.status(DEFAULT).send({ message: 'We have encountered an error' });
     });
@@ -112,6 +110,7 @@ const updateUserAvatar = (req, res) => {
       }
       if (err.message === 'NotFound') {
         res.status(NOT_FOUND).send({ message: 'User not found' });
+        return;
       }
       res.status(DEFAULT).send({ message: 'We have encountered an error' });
     });

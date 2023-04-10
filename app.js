@@ -1,14 +1,19 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const helmet = require('helmet');
+const limiter = require('./constants/rateLimit');
 
 const { PORT = 3000 } = process.env;
 
 const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
 
-const { NOT_FOUND, DEFAULT } = require('./constants/utils');
+const { NOT_FOUND } = require('./constants/utils');
 
 const app = express();
+
+app.use(helmet());
+app.use(limiter);
 
 // body-parser middleware
 app.use(express.json());
@@ -30,7 +35,6 @@ app.use('/', cardsRouter);
 // error handling middleware
 app.use((err, req, res) => {
   res.status(NOT_FOUND).send({ message: 'Resource not found' });
-  res.status(DEFAULT).send({ message: 'We have encountered an error' });
 });
 
 // connect to MongoDB
