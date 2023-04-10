@@ -33,7 +33,7 @@ app.use('/', usersRouter);
 app.use('/', cardsRouter);
 
 // error handling middleware
-app.use((err, req, res) => {
+app.use((req, res) => {
   res.status(NOT_FOUND).send({ message: 'Resource not found' });
 });
 
